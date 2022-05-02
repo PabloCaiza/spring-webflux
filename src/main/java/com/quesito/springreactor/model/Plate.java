@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import javax.validation.constraints.Size;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,6 +16,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class Plate {
     @Id
     private String id;
+
+    private String plateNumber;
+    @Size(min = 1, max = 100)
     private String name;
     private Double price;
     private Boolean status;

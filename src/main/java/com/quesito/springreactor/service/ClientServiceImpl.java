@@ -1,19 +1,19 @@
 package com.quesito.springreactor.service;
 
+import com.quesito.springreactor.model.Client;
 import com.quesito.springreactor.model.Plate;
+import com.quesito.springreactor.repo.IClientRepo;
 import com.quesito.springreactor.repo.IGenericRepo;
 import com.quesito.springreactor.repo.IPlateRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
-public class PlateServiceImpl extends CrudImpl<Plate,String> implements IPlateService {
+public class ClientServiceImpl extends CrudImpl<Client,String> implements IClientService {
     @Autowired
-    private IPlateRepo repo;
+    private IClientRepo repo;
     @Override
-    IGenericRepo<Plate, String> getRepo() {
+    IGenericRepo<Client, String> getRepo() {
         return repo;
     }
 }
