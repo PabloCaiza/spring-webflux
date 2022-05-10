@@ -1,8 +1,12 @@
 package com.quesito.springreactor.service;
 
+import com.quesito.springreactor.pagination.PageSupport;
 import com.quesito.springreactor.repo.IGenericRepo;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 public abstract class CrudImpl<T,ID> implements ICrud<T,ID>{
 
@@ -30,5 +34,18 @@ public abstract class CrudImpl<T,ID> implements ICrud<T,ID>{
     @Override
     public Mono<Void> deleteById(ID id) {
         return getRepo().deleteById(id);
+    }
+    public Mono<PageSupport<T>> getPage(Pageable page){
+        return getRepo()
+                .findAll()
+                .collectList()
+                .map(list -> new PageSupport<T>(
+                        list.stream()
+                                .skip((long) page.getPageNumber() * page.getPageSize())
+                                .limit(page.getPageSize())
+                                .collect(Collectors.toList())
+                        , page.getPageNumber(),page.getPageSize(),list.size()));
+
+
     }
 }

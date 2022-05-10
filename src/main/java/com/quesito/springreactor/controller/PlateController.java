@@ -2,8 +2,10 @@ package com.quesito.springreactor.controller;
 
 import com.quesito.springreactor.model.Client;
 import com.quesito.springreactor.model.Plate;
+import com.quesito.springreactor.pagination.PageSupport;
 import com.quesito.springreactor.service.IPlateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
@@ -99,4 +101,16 @@ public class PlateController {
                 .zipWith(iPlateService.findById(id),(links, plate) ->EntityModel.of(plate,links));
     }
 
+    @GetMapping("/pageable")
+    public Mono<ResponseEntity<PageSupport<Plate>>> findAllPageable(
+            @RequestParam(name = "page",defaultValue = "0") int page,
+            @RequestParam(name = "size",defaultValue ="5") int size) {
+        return iPlateService.getPage(PageRequest.of(page,size))
+                .map(p -> ResponseEntity
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(p))
+                .defaultIfEmpty(ResponseEntity.noContent().build());
+
+    }
 }

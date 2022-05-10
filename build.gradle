@@ -29,6 +29,7 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
     implementation 'io.projectreactor.addons:reactor-extra'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.cloudinary:cloudinary-http44:1.32.2'
 }
 
 tasks.named('test') {
