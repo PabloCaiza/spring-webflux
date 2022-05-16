@@ -1,29 +1,23 @@
 package com.quesito.springreactor.handler;
 
-import com.quesito.springreactor.dto.ValidationDTO;
-import com.quesito.springreactor.model.Plate;
-import com.quesito.springreactor.service.IPlateService;
+import com.quesito.springreactor.model.Invoice;
+import com.quesito.springreactor.service.IInvoiceService;
 import com.quesito.springreactor.validators.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.Optional;
 
 @Component
-public class PlateHandler {
+public class InvoiceHandler {
     @Autowired
-    private IPlateService iPlateService;
+    private IInvoiceService iInvoiceService;
     @Autowired
     private Validator validator;
     @Autowired
@@ -33,7 +27,7 @@ public class PlateHandler {
         return ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(iPlateService.findAll(), Plate.class);
+                .body(iInvoiceService.findAll(), Invoice.class);
 
     }
 
@@ -42,16 +36,16 @@ public class PlateHandler {
         return ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(iPlateService.findById(id), Plate.class)
+                .body(iInvoiceService.findById(id), Invoice.class)
                 .switchIfEmpty(ServerResponse.notFound().build());
 
     }
 
     public Mono<ServerResponse> create(ServerRequest serverRequest) {
-//        return serverRequest.bodyToMono(Plate.class)
-//                .flatMap(plate -> {
-//                    Errors errors = new BeanPropertyBindingResult(plate, Plate.class.getName());
-//                    validator.validate(plate, errors);
+//        return serverRequest.bodyToMono(Invoice.class)
+//                .flatMap(invoice -> {
+//                    Errors errors = new BeanPropertyBindingResult(invoice, Invoice.class.getName());
+//                    validator.validate(invoice, errors);
 //                    if(errors.hasErrors()) {
 //                        return Flux.fromIterable(errors.getAllErrors())
 //                                .map(error -> new ValidationDTO(error.getCode(), error.getDefaultMessage()))
@@ -59,17 +53,17 @@ public class PlateHandler {
 //                                .flatMap(validationDTOS -> ServerResponse.badRequest().body(Mono.just(validationDTOS), ValidationDTO.class));
 //
 //                    }else {
-//                        return iPlateService.save(plate).flatMap(p -> ServerResponse
+//                        return iInvoiceService.save(invoice).flatMap(p -> ServerResponse
 //                                .created(URI.create(serverRequest.uri().toString().concat("/").concat(p.getId())))
 //                                .contentType(MediaType.APPLICATION_JSON)
-//                                .body(Mono.just(plate), Plate.class));
+//                                .body(Mono.just(invoice), Invoice.class));
 //                    }
 //
 //
 //                });
-        return serverRequest.bodyToMono(Plate.class)
+        return serverRequest.bodyToMono(Invoice.class)
                 .flatMap(requestValidator::validate)
-                .flatMap(iPlateService::save)
+                .flatMap(iInvoiceService::save)
                 .flatMap(p -> ServerResponse
                         .created(URI.create(serverRequest.uri().toString().concat("/").concat(p.getId())))
                         .body(BodyInserters.fromValue(p)));
@@ -78,24 +72,25 @@ public class PlateHandler {
 
     public Mono<ServerResponse> update(ServerRequest serverRequest) {
         String id = serverRequest.pathVariable("id");
-        Mono<Plate> plateMono = serverRequest.bodyToMono(Plate.class);
-        Mono<Plate> plateDb = iPlateService.findById(id);
-        return plateMono.zipWith(plateDb, (plate, db) -> {
-                    db.setName(plate.getName());
-                    db.setPrice(plate.getPrice());
-                    db.setStatus(plate.getStatus());
-                    db.setPlateNumber(plate.getPlateNumber());
+        Mono<Invoice> invoiceMono = serverRequest.bodyToMono(Invoice.class);
+        Mono<Invoice> invoiceDb = iInvoiceService.findById(id);
+        return invoiceMono.zipWith(invoiceDb, (invoice, db) -> {
+                    db.setId(invoice.getId());
+                    db.setDescription(invoice.getDescription());
+                    db.setClient(invoice.getClient());
+                    db.setItems(invoice.getItems());
+
                     return db;
                 })
-                .flatMap(iPlateService::update)
-                .flatMap(plate -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(Mono.just(plate), Plate.class))
+                .flatMap(iInvoiceService::update)
+                .flatMap(invoice -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(Mono.just(invoice), Invoice.class))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
     public Mono<ServerResponse> delete(ServerRequest serverRequest) {
         String id = serverRequest.pathVariable("id");
-        return iPlateService.findById(id)
-                .flatMap(plate -> iPlateService.deleteById(id).then(ServerResponse.ok().build())
+        return iInvoiceService.findById(id)
+                .flatMap(invoice -> iInvoiceService.deleteById(id).then(ServerResponse.ok().build())
                         .switchIfEmpty(ServerResponse.notFound().build()));
 
     }
